@@ -1,0 +1,171 @@
+{% extends "request/base.html" %}
+
+{% block title %}Request Details - NMDPRA SMS{% endblock %}
+
+{% block content %}
+<div class="request-container">
+    <div class="nav-buttons">
+        <a href="{{ url_for('request.get_all_requests') }}" class="back-button">← Back to All Requests</a>
+        <div class="action-buttons">
+            {% if request.status == 'pending' %}
+            <a href="{{ url_for('request.update_request_status', request_id=request.id) }}" 
+               class="action-button">Update Status</a>
+            {% elif request.status == 'approved' or request.status == 'partially approved' %}
+            <a href="{{ url_for('request.mark_collected', request_id=request.id) }}" 
+               class="action-button">Collect</a>
+            {% endif %}
+        </div>
+
+        {% if current_user.is_admin and request.status.value != 'collected' %}
+        <!-- Delete Button triggers modal -->
+        <button type="button" class="action-link delete" style="margin-left:1rem;" onclick="showDeleteModal('{{ request.id }}')">
+            Delete
+        </button>
+        {% endif %}
+    </div>
+
+    <div class="request-header">
+        <h2>Request Details</h2>
+        <span class="status-badge status-{{ request.status.value }}">
+            {{ request.status.value|title }}
+        </span>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    {% for category, message in messages %}
+    <div class="messages {{ category }}">{{ message }}</div>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+
+    <div class="request-details">
+        <div class="request-detail-item">
+            <div class="detail-label">Reference Number</div>
+            <div class="detail-value">{{ request.reference_number }}</div>
+        </div>
+        <div class="request-detail-item">
+            <div class="detail-label">Requester</div>
+            <div class="detail-value">
+                {{ request.user.name }}<br>
+                <small>{{ request.user.email }}</small>
+            </div>
+        </div>
+        <div class="request-detail-item">
+            <div class="detail-label">Directorate</div>
+            <div class="detail-value">{{ request.directorate.value if request.directorate else 'N/A' }}</div>
+        </div>
+        <div class="request-detail-item">
+            <div class="detail-label">Department</div>
+            <div class="detail-value">{{ request.department or 'N/A' }}</div>
+        </div>
+        <div class="request-detail-item">
+            <div class="detail-label">Unit</div>
+            <div class="detail-value">{{ request.unit }}</div>
+        </div>
+        <div class="request-detail-item">
+            <div class="detail-label">Location</div>
+            <div class="detail-value">{{ request.location }}</div>
+        </div>
+        <div class="request-detail-item">
+            <div class="detail-label">Created At</div>
+            <div class="detail-value">{{ request.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</div>
+        </div>
+        <div class="request-detail-item">
+            <div class="detail-label">Last Updated</div>
+            <div class="detail-value">{{ request.updated_at.strftime('%Y-%m-%d %H:%M:%S') }}</div>
+        </div>
+    </div>
+
+    {% if request.admin_message %}
+    <div class="request-detail-item" style="margin-bottom: 2rem;">
+        <div class="detail-label">Admin Message</div>
+        <div class="detail-value">{{ request.admin_message }}</div>
+    </div>
+    {% endif %}
+
+    {% if request.approved_by_user %}
+    <div class="request-detail-item">
+        <div class="detail-label">Approved By</div>
+        <div class="detail-value">
+            {{ request.approved_by_user.name }}<br>
+            <small>{{ request.approved_by_user.email }}</small>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="request-items">
+        <h3>Requested Items</h3>
+        {% for item in request.items %}
+        <div class="request-item">
+            <div class="request-item-header">
+                <h4>{{ item.inventory.item_name }}</h4>
+                <span class="status-badge status-{{ item.status.value }}">
+                    {{ item.status.value|title }}
+                </span>
+            </div>
+            <div class="request-item-details">
+                <div>
+                    <div class="detail-label">Category</div>
+                    <div class="detail-value">{{ item.inventory.category.name }}</div>
+                </div>
+                <div>
+                    <div class="detail-label">Quantity Requested</div>
+                    <div class="detail-value">{{ item.quantity }}</div>
+                </div>
+                <div>
+                    <div class="detail-label">Quantity Approved</div>
+                    <div class="detail-value">
+                        {% if item.status.value == 'rejected' or item.status.value == 'pending' %}
+                        N/A
+                        {% else %}
+                        {{ item.quantity_approved }}
+                        {% endif %}
+                    </div>
+                </div>
+                <div>
+                    <div class="detail-label">Current Stock</div>
+                    <div class="detail-value">{{ item.inventory.quantity }}</div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<div id="deleteModal" class="modal"
+    style="display:none; position:fixed; z-index:1000; left:0; top:0; width:100vw; height:100vh; background:rgba(0,0,0,0.4);">
+    <div
+        style="background:white; max-width:400px; margin:10vh auto; padding:2rem; border-radius:8px; position:relative;">
+        <h3 style="color:#dc3545;">Delete Request</h3>
+        <form id="deleteForm" method="POST">
+            <div class="form-group">
+                <label for="delete-reason">Reason for deletion</label>
+                <textarea id="delete-reason" name="reason" rows="3" required style="width:100%;"></textarea>
+            </div>
+            <div style="margin-top:1rem; display:flex; justify-content:flex-end; gap:1rem;">
+                <button type="button" onclick="hideDeleteModal()" class="action-link view">Cancel</button>
+                <button type="submit" class="action-link delete">Delete</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    let deleteModal = document.getElementById('deleteModal');
+    let deleteForm = document.getElementById('deleteForm');
+    function showDeleteModal(requestId) {
+        deleteForm.action = "{{ url_for('request.delete_request', request_id=0) }}".replace('0', requestId);
+        document.getElementById('delete-reason').value = '';
+        deleteModal.style.display = 'block';
+    }
+    function hideDeleteModal() {
+        deleteModal.style.display = 'none';
+    }
+    window.onclick = function (event) {
+        if (event.target == deleteModal) {
+            hideDeleteModal();
+        }
+    }
+</script>
+{% endblock %}

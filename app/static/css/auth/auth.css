@@ -1,0 +1,219 @@
+:root {
+    --color-green-dark: #2e7d32;
+    --color-green: #4caf50;
+    --color-green-light: #e8f5e9;
+    --color-green-hover: #1b5e20;
+    --color-green-medium: #43a047;
+    --color-red: #c62828;
+    --color-red-light: #ffebee;
+    --color-red-border: #ef9a9a;
+    --color-white: #fff;
+    --color-gray: #888;
+    --color-gray-light: #f9f9f9;
+    --color-border: #ddd;
+    --color-shadow: rgba(0, 0, 0, 0.1);
+    --color-shadow-light: rgba(0, 0, 0, 0.04);
+    --radius: 8px;
+    --padding: 2rem;
+    --font-main: Arial, sans-serif;
+    --transition: 0.3s;
+    --button-padding: 12px 24px;
+    --button-radius: 4px;
+    --button-font-size: 16px;
+}
+
+body {
+    font-family: var(--font-main);
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: var(--color-green-light);
+}
+
+.main-container {
+    width: 100%;
+    max-width: 400px;
+    padding: var(--padding);
+}
+
+.login-container {
+    background-color: var(--color-white);
+    padding: var(--padding);
+    border-radius: var(--radius);
+    box-shadow: 0 2px 4px var(--color-shadow);
+    text-align: center;
+    max-width: 600px;
+    width: 90%;
+}
+
+.auth-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.auth-header .logo {
+    max-width: 150px;
+    margin-bottom: 1rem;
+}
+
+.auth-header h1 {
+    font-size: 1.8rem;
+    color: var(--color-green-dark);
+    margin: 0;
+}
+
+.auth-header p {
+    font-size: 1rem;
+    color: var(--color-green);
+    margin: 0.5rem 0;
+}
+
+.auth-nav {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.auth-nav a {
+    text-decoration: none;
+    color: var(--color-green-dark);
+    font-weight: bold;
+    transition: color var(--transition);
+}
+
+.auth-nav a:hover {
+    color: var(--color-green-hover);
+}
+
+.auth-nav .active {
+    color: var(--color-red);
+}
+
+.auth-content p {
+    color: var(--color-green-dark);
+    margin-bottom: 1rem;
+}
+
+/* Form elements */
+.login-button {
+    background-color: var(--color-green);
+    color: var(--color-white);
+    padding: var(--button-padding);
+    border: none;
+    border-radius: var(--button-radius);
+    cursor: pointer;
+    font-size: var(--button-font-size);
+    text-decoration: none;
+    display: inline-block;
+    margin-top: 20px;
+    transition: background-color var(--transition);
+}
+
+.login-button:hover {
+    background-color: var(--color-green-medium);
+}
+
+/* Message styles */
+.messages {
+    margin: 1rem 0;
+    padding: 1rem;
+    border-radius: var(--button-radius);
+}
+
+.error {
+    background-color: var(--color-red-light);
+    color: var(--color-red);
+    border: 1px solid var(--color-red-border);
+}
+
+.info {
+    background-color: var(--color-green-light);
+    color: var(--color-green-dark);
+    border: 1px solid var(--color-green);
+}
+
+/* ================= LOCAL AUTHENTICATION (TEST ONLY) ===================
+   The following styles are for the local login form and related layout.
+   This section is for testing/development only and should be removed before production deployment.
+======================================================================= */
+.local-login-form {
+    background: var(--color-gray-light);
+    padding: var(--padding);
+    border-radius: var(--radius);
+    margin-bottom: 2rem;
+    box-shadow: 0 2px 4px var(--color-shadow-light);
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.local-login-form h2 {
+    margin-top: 0;
+    color: var(--color-green-dark);
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+.local-login-form .form-group {
+    margin-bottom: 1.2rem;
+}
+
+.local-login-form label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: var(--color-green-dark);
+    font-weight: bold;
+}
+
+.local-login-form input[type="email"],
+.local-login-form input[type="password"] {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--button-radius);
+}
+
+/* Divider between login options */
+.divider {
+    position: relative;
+    margin: 2rem 0;
+    text-align: center;
+}
+
+.divider span {
+    background: var(--color-white);
+    padding: 0 1rem;
+    color: var(--color-gray);
+    position: relative;
+    z-index: 1;
+}
+
+.divider hr {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    border: none;
+    border-top: 1px solid #ccc;
+    z-index: 0;
+    margin: 0;
+}
+
+/* Microsoft login section (shared styles) */
+.ms-login-section {
+    text-align: center;
+}
+
+/* Responsive layout for login page */
+@media (max-width: 700px) {
+    .login-container {
+        max-width: 98vw !important;
+        padding: 1rem !important;
+    }
+}
+
+/* ================= END LOCAL AUTHENTICATION (TEST ONLY) =============== */

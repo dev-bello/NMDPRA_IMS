@@ -1,0 +1,114 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+sqlite-to-mysql/
+sqlite-to-dump.sql
+*.sql
+
+# Virtual Environment
+.venv/bin
+pyvenv.cfg
+pyenv.cfg
+venv/
+ENV/
+env/
+#
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# Flask
+instance/
+.webassets-cache
+.env
+.env.*
+
+# Database
+*.db
+*.sqlite3
+*.sqlite
+instance/
+__pycache__/
+*.pyc
+dev.db
+# MySQL
+*.mysql
+*.mysql-*
+migrations/__pycache__/
+migrations/versions/__pycache__/
+
+# SSL Certificates
+ssl_certificate/
+ssl_certficate/
+*.pem
+*.crt
+*.key
+*.csr
+*.cer
+*.der
+*.priv
+!app/ssl/ca.pem
+
+
+# Logs
+*.log
+logs/
+
+# Coverage reports
+htmlcov/
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+
+# Translations
+*.mo
+*.pot
+
+# Media files
+media/
+uploads/ 
+
+# Azure
+startup.txt
+startup.sh
+web.config
+.deployment
+
+# Miscellaneous
+miscellaneous/
+update_existing_users.py
+create_test_users.py
+test_local_auth.py
+
+# Ignore specific files
+# These files are not to be tracked or modified
+*.csv
+clean_stock_report.py
+.roomodes

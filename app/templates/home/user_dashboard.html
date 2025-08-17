@@ -1,0 +1,50 @@
+{% extends "home/base.html" %}
+
+{% block title %}User Dashboard - NMDPRA SMS{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <div class="welcome-section">
+        <h2>Hi, {{ current_user.name }}</h2>
+        <p>Last login: {{ current_user.last_login.strftime('%Y-%m-%d %H:%M:%S') }}</p>
+    </div>
+    
+    <div class="user-profile-section">
+        <h3>Your Profile Information</h3>
+        <div class="profile-details">
+            <div class="profile-item">
+                <strong>Email:</strong> {{ current_user.email }}
+            </div>
+            <div class="profile-item">
+                <strong>Job Title:</strong> {{ current_user.job_title or 'Not specified' }}
+            </div>
+            <div class="profile-item">
+                <strong>Department:</strong> {{ current_user.department or 'Not specified' }}
+            </div>
+            <div class="profile-item">
+                <strong>Company:</strong> {{ current_user.company_name or 'Not specified' }}
+            </div>
+            <div class="profile-item">
+                <strong>Office Location:</strong> {{ current_user.office_location or 'Not specified' }}
+            </div>
+        </div>
+    </div>
+    
+    <div class="quick-actions">
+        <h3>Quick Actions</h3>
+        <div class="action-buttons">
+            <a href="{{ url_for('inventory.index') }}" class="action-button">
+                View Inventory
+            </a>
+            {% if not current_user.is_admin %}
+            <a href="{{ url_for('request.create_request') }}" class="action-button">
+                Create Order
+            </a>
+            <a href="{{ url_for('request.get_my_requests') }}" class="action-button">
+                Request History
+            </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

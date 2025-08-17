@@ -1,0 +1,97 @@
+/* General body styling for background color */
+body:has(.report-container) {
+    background-color: #e8f5e9; /* Light green background */
+}
+
+/* Styling for the main report container */
+.report-container {
+    background-color: #ffffff; /* White background */
+    padding: 20px;
+    border-radius: 8px; /* Rounded corners */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+/* Basic table styling for a tabulated format */
+.inventory-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 1.5rem;
+    font-size: 0.9rem;
+    border: 1px solid #dee2e6; /* Add border around the entire table */
+}
+
+.inventory-table th,
+.inventory-table td {
+    padding: 10px;
+    text-align: left;
+    border-bottom: 1px solid #dee2e6; /* Bootstrap's default table border color */
+    border-right: 1px solid #dee2e6; /* Add vertical borders */
+}
+
+.inventory-table th:last-child,
+.inventory-table td:last-child {
+    border-right: none; /* Remove right border for the last column */
+}
+
+
+.inventory-table th {
+    background-color: #e9ecef; /* Light grey background for headers */
+    font-weight: bold;
+}
+
+.inventory-table tbody tr:hover {
+    background-color: #f2f2f2; /* Hover effect for rows */
+}
+
+/* Style for the total rows */
+.inventory-table tbody tr[style*="font-weight:bold"] {
+    background-color: #f8f9fa; /* Light background for totals */
+    font-weight: bold;
+}
+
+/* Style for the grand total header */
+.inventory-table thead tr[style*="background:#e0e0e0;"] {
+    background-color: #e0e0e0; /* Darker background for grand total header */
+}
+
+/* Adjust column spans for total rows */
+.inventory-table tbody tr[style*="font-weight:bold"] td:first-child {
+    /* Remove grid-column span as we are not using grid for layout */
+}
+
+.inventory-table thead tr[style*="background:#e0e0e0;"] th:first-child {
+     /* Remove grid-column span as we are not using grid for layout */
+}
+
+/* Ensure the last cell in the grand total header spans correctly */
+.inventory-table thead tr[style*="background:#e0e0e0;"] th:last-child {
+    /* Remove grid-column span as we are not using grid for layout */
+}
+
+/* Remove grid-specific styles */
+.inventory-table tbody tr,
+.inventory-table thead tr {
+    display: table-row; /* Revert to default table row display */
+    gap: 0; /* Remove gap */
+    align-items: auto; /* Revert to default alignment */
+}
+
+.inventory-table thead tr {
+    margin-bottom: 0; /* Remove margin */
+}
+
+.inventory-table tbody tr {
+    margin-bottom: 0; /* Remove margin */
+    border: none; /* Remove row border */
+    padding: 0; /* Remove row padding */
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .inventory-table th,
+    .inventory-table td {
+        padding: 8px; /* Adjust padding for smaller screens */
+    }
+}

@@ -1,0 +1,52 @@
+
+<!-- Category Create Template -->
+
+{# Category create template
+- Allows creating new categories
+- Provides form for category name and description
+- Displays success or error messages
+- Includes validation for required fields
+- Admin only access
+#}
+
+
+{% extends "inventory/base.html" %}
+
+{% block title %}Create Category - NMDPRA SMS{% endblock %}
+
+{% block content %}
+<div class="inventory-container">
+    <div class="inventory-header">
+        <h2>Create New Category</h2>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    {% for category, message in messages %}
+    <div class="messages {{ category }}">
+        {{ message }}
+    </div>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+
+    <div class="form-container">
+        <form method="POST" class="inventory-form">
+            <div class="form-group">
+                <label for="name">Category Name</label>
+                <input type="text" id="name" name="name" required>
+            </div>
+
+            <div class="form-group">
+                <label for="description">Description</label>
+                <textarea id="description" name="description" rows="4"></textarea>
+            </div>
+
+            <div class="form-group">
+                <button type="submit" class="create-button">Create Category</button>
+                <a href="{{ url_for('inventory.categories') }}" class="action-link view">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

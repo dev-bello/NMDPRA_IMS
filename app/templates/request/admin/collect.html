@@ -1,0 +1,103 @@
+{% extends "request/base.html" %}
+
+{% block title %}Mark Request as Collected - NMDPRA SMS{% endblock %}
+
+{% block content %}
+<div class="request-container">
+    <div class="nav-buttons">
+        <a href="{{ url_for('request.get_all_requests') }}" class="back-button">← Back to Request</a>
+    </div>
+
+    <div class="request-header">
+        <h2>Mark Request as Collected</h2>
+        <span class="status-badge status-{{ request.status.value }}">
+            Current: {{ request.status.value|title }}
+        </span>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    {% for category, message in messages %}
+    <div class="messages {{ category }}">{{ message }}</div>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+
+    <div class="request-details">
+        <div class="request-detail-item">
+            <div class="detail-label">Reference Number</div>
+            <div class="detail-value">{{ request.reference_number }}</div>
+        </div>
+        <div class="request-detail-item">
+            <div class="detail-label">Requester</div>
+            <div class="detail-value">
+                {{ request.user.name }}<br>
+                <small>{{ request.user.email }}</small>
+            </div>
+        </div>
+        <div class="request-detail-item">
+            <div class="detail-label">Directorate</div>
+            <div class="detail-value">{{ request.directorate.value if request.directorate else 'N/A' }}</div>
+        </div>
+        <div class="request-detail-item">
+            <div class="detail-label">Department</div>
+            <div class="detail-value">{{ request.department or 'N/A' }}</div>
+        </div>
+        <div class="request-detail-item">
+            <div class="detail-label">Unit</div>
+            <div class="detail-value">{{ request.unit }}</div>
+        </div>
+        <div class="request-detail-item">
+            <div class="detail-label">Location</div>
+            <div class="detail-value">{{ request.location }}</div>
+        </div>
+    </div>
+
+    <div class="request-items">
+        <h3>Items to be Collected</h3>
+        {% for item in request.items if item.status.value == 'approved' %}
+        <div class="request-item">
+            <div class="request-item-header">
+                <h4>{{ item.inventory.item_name }}</h4>
+                <div class="item-status">
+                    <span class="status-badge status-approved">Will be Collected</span>
+                </div>
+            </div>
+            <div class="request-item-details">
+                <div>
+                    <div class="detail-label">Category</div>
+                    <div class="detail-value">{{ item.inventory.category.name }}</div>
+                </div>
+                <div>
+                    <div class="detail-label">Quantity Approved</div>
+                    <div class="detail-value">{{ item.quantity_approved }}</div>
+                </div>
+                <div>
+                    <div class="detail-label">Current Stock</div>
+                    <div class="detail-value">{{ item.inventory.quantity }}</div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="form-container">
+        <form method="POST" class="inventory-form">
+            <div class="form-group">
+                <label for="admin_note">Collection Note</label>
+                <textarea id="admin_note" name="admin_note" rows="4"
+                          placeholder="Add any notes about the collection (optional)"></textarea>
+            </div>
+
+            <div class="form-group" style="margin-top: 2rem;">
+                <button type="submit" class="action-button"
+                        onclick="return confirm('Are you sure you want to mark this request as collected? This will update inventory quantities.')">
+                    Confirm Collection
+                </button>
+                <a href="{{ url_for('request.get_request', request_id=request.id) }}"
+                   class="action-link view">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

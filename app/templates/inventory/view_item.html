@@ -1,0 +1,115 @@
+{# Detailed view of a single inventory item
+- Shows all item properties
+- Displays audit information (creator, timestamps)
+- Admin actions for edit/delete
+#}
+
+{% extends "inventory/base.html" %}
+
+{% block title %}{{ inventory.item_name }} - NMDPRA SMS{% endblock %}
+
+{% block content %}
+<div class="inventory-container">
+    <div class="inventory-header">
+        <h2>Inventory Item Details</h2>
+        <div>
+            {% if is_admin %}
+            <a href="{{ url_for('inventory.edit_item', inventory_id=inventory.id) }}" class="action-link edit">Edit</a>
+            <form method="POST" action="{{ url_for('inventory.delete_item', inventory_id=inventory.id) }}"
+                style="display: inline;">
+                <input type="submit" value="Delete" class="action-link delete"
+                    onclick="return confirm('Are you sure you want to delete this item?')">
+            </form>
+            {% endif %}
+            <a href="{{ url_for('inventory.index') }}" class="action-link view">Back to List</a>
+        </div>
+    </div>
+
+    <div class="item-details">
+        <table class="inventory-table">
+            <tr>
+                <th>Item Name</th>
+                <td>{{ inventory.item_name }}</td>
+            </tr>
+            <tr>
+                <th>Category</th>
+                <td>{{ inventory.category.name }}</td>
+            </tr>
+            <tr>
+                <th>{% if is_admin %}Quantity{% else %}Stock Status{% endif %}</th>
+                <td>
+                    {% if is_admin %}
+                        <span class="quantity-display {% if inventory.quantity == 0 %}out{% elif inventory.quantity < 15 %}low{% endif %}">
+                            {{ inventory.quantity }}
+                        </span>
+                    {% else %}
+                        <button class="stock-status-btn {{ get_stock_status(inventory.quantity) }}" disabled>
+                            {{ get_stock_status_text(inventory.quantity) }}
+                        </button>
+                    {% endif %}
+                </td>
+            </tr>
+            {% if is_admin %}
+            <tr>
+                <th>Unit Price</th>
+                <td>{{ '₦%.2f'|format(inventory.unit_price) if inventory.unit_price else 'N/A' }}</td>
+            </tr>
+            <tr>
+                <th>Supplier</th>
+                <td>{{ inventory.supplier or 'N/A' }}</td>
+            </tr>
+            {% endif %}
+            <tr>
+                <th>Location</th>
+                <td>{{ inventory.location or 'N/A' }}</td>
+            </tr>
+            <tr>
+                <th>Description</th>
+                <td>{{ inventory.description or 'N/A' }}</td>
+            </tr>
+            {% if is_admin %}
+            <tr>
+                <th>Created By</th>
+                <td>{{ inventory.creator.name }}</td>
+            </tr>
+            <tr>
+                <th>Created At</th>
+                <td>{{ inventory.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+            </tr>
+            <tr>
+                <th>Last Updated By</th>
+                <td>{{ inventory.updater.name }}</td>
+            </tr>
+            <tr>
+                <th>Last Updated At</th>
+                <td>{{ inventory.updated_at.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+            </tr>
+            {% endif %}
+        </table>
+    </div>
+
+    {% if is_admin and supplier_history %}
+    <div class="supplier-history">
+        <h3>Supplier History</h3>
+        <table class="inventory-table">
+            <thead>
+                <tr>
+                    <th>Supplier Name</th>
+                    <th>Unit Price</th>
+                    <th>Last Purchase Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for supplier in supplier_history %}
+                <tr>
+                    <td>{{ supplier.supplier_name }}</td>
+                    <td>{{ '₦%.2f'|format(supplier.unit_price) if supplier.unit_price else 'N/A' }}</td>
+                    <td>{{ supplier.last_purchase_date.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

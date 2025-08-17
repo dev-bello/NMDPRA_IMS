@@ -1,0 +1,143 @@
+{% extends "inventory/base.html" %}
+{% block title %}Bulk Add Inventory Items{% endblock %}
+
+{% block extra_css %}
+{{ super() }}
+<style>
+/* Override main-content for this page only */
+.main-content {
+    max-width: 100% !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+.bulk-create-container {
+    background-color: white;
+    border-radius: 0;
+    padding: 2rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-top: 2rem;
+    width: 100%;
+    overflow-x: auto;
+    box-sizing: border-box;
+}
+
+.bulk-create-header {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.bulk-create-header h2 {
+    color: #2e7d32;
+    margin: 0;
+}
+
+.bulk-form-container {
+    width: 100%;
+    margin: 2rem 0 0 0;
+    box-sizing: border-box;
+}
+
+.inventory-table {
+    width: 100%;
+    min-width: 1200px; /* Adjust as needed for all columns */
+    box-sizing: border-box;
+}
+
+.table-responsive {
+    width: 100%;
+    overflow-x: auto;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="bulk-create-container">
+    <div class="bulk-create-header">
+        <h2>Bulk Add Inventory Items</h2>
+    </div>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    {% for category, message in messages %}
+    <div class="messages {{ category }}">{{ message }}</div>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+    <div class="bulk-form-container">
+        <form method="POST" class="inventory-form">
+            <div class="table-responsive">
+                <table class="inventory-table">
+                    <thead>
+                        <tr>
+                            <th>Item Name</th>
+                            <th>Category</th>
+                            <th>Quantity</th>
+                            <th>Supplier</th>
+                            <th>Unit Price</th>
+                            <th>Location</th>
+                            <th>Description</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="items-container">
+                        <tr class="bulk-item-row">
+                            <td><input type="text" name="item_name" required></td>
+                            <td>
+                                <select name="category_id" required>
+                                    <option value="">Select Category</option>
+                                    {% for category in categories %}
+                                    <option value="{{ category.id }}">{{ category.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </td>
+                            <td><input type="number" name="quantity" min="0" required></td>
+                            <td><input type="text" name="supplier"></td>
+                            <td><input type="number" name="unit_price" step="0.01" min="0"></td>
+                            <td>
+                                <select name="location" required>
+                                    <option value="">Select Location</option>
+                                    <option value="Headquarters">Headquarters</option>
+                                </select>
+                            </td>
+                            <td><textarea name="description" rows="2"></textarea></td>
+                            <td></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <button type="button" class="create-button" id="add-item">+ Add Another Item</button>
+            <button type="submit" class="create-button">Create Items</button>
+            <a href="{{ url_for('inventory.index') }}" class="action-link view">Cancel</a>
+        </form>
+    </div>
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const container = document.getElementById('items-container');
+        const addButton = document.getElementById('add-item');
+        addButton.addEventListener('click', function () {
+            const newRow = container.querySelector('.bulk-item-row').cloneNode(true);
+            newRow.querySelectorAll('input, select, textarea').forEach(input => {
+                if (input.type === 'number' || input.type === 'text' || input.tagName === 'TEXTAREA') {
+                    input.value = '';
+                } else if (input.tagName === 'SELECT') {
+                    input.selectedIndex = 0;
+                }
+            });
+            // Add remove button
+            let actionCell = newRow.querySelector('td:last-child');
+            actionCell.innerHTML = '';
+            const removeBtn = document.createElement('button');
+            removeBtn.type = 'button';
+            removeBtn.className = 'action-link delete';
+            removeBtn.textContent = 'Remove';
+            removeBtn.onclick = function () { newRow.remove(); };
+            actionCell.appendChild(removeBtn);
+            container.appendChild(newRow);
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,162 @@
+{% extends "purchases/base.html" %}
+
+{% block title %}Record New Purchase{% endblock %}
+
+{% block content %}
+<div class="purchase-container">
+    <div class="nav-buttons">
+        <a href="{{ url_for('home.admin_dashboard') }}" class="back-button">← Back to Dashboard</a>
+        <a href="{{ url_for('purchases.list_purchases') }}" class="back-button">View Purchases</a>
+    </div>
+
+    <div class="purchase-header">
+        <h2>Record New Purchase</h2>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    {% for category, message in messages %}
+    <div class="messages {{ category }}">{{ message }}</div>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+
+    <div class="form-container">
+        <form method="POST" class="inventory-form">
+            <div class="purchase-items">
+                <h3>Add Items to Purchase</h3>
+                <table class="purchase-table">
+                    <thead>
+                        <tr>
+                            <th>Category</th>
+                            <th>Item</th>
+                            <th>Quantity</th>
+                            <th>Supplier</th>
+                            <th>Unit Price</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="items-container">
+                        <tr class="purchase-item">
+                            <td>
+                                <select name="category_id" class="category-select" required>
+                                    <option value="">Select Category</option>
+                                    {% for category in categories %}
+                                    <option value="{{ category.id }}">{{ category.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </td>
+                            <td>
+                                <select name="inventory_id" class="item-select" required>
+                                    <option value="">Select Item</option>
+                                    {% for item in items %}
+                                    <option value="{{ item.id }}" data-category="{{ item.category_id }}"
+                                        data-quantity="{{ item.quantity }}">
+                                        {{ item.item_name }} (Stock: {{ item.quantity }})
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </td>
+                            <td>
+                                <input type="number" name="quantity" min="1" required>
+                            </td>
+                            <td>
+                                <input type="text" class="form-control" name="supplier">
+                            </td>
+                            <td>
+                                <input type="number" class="form-control" name="unit_price" min="0" step="0.01">
+                            </td>
+                            <td></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div style="display: flex; justify-content: space-between;">
+                    <button type="button" class="action-link view" id="add-item">+ Add Another Item</button>
+                    <button type="submit" class="action-button">Record Purchase</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const container = document.getElementById('items-container');
+        const addButton = document.getElementById('add-item');
+
+        function setupCategoryFilter(itemRow) {
+            const categorySelect = itemRow.querySelector('.category-select');
+            const itemSelect = itemRow.querySelector('.item-select');
+            categorySelect.addEventListener('change', function () {
+                const selectedCategory = this.value;
+                Array.from(itemSelect.options).forEach(option => {
+                    if (!option.value) {
+                        option.style.display = '';
+                    } else if (option.dataset.category === selectedCategory) {
+                        option.style.display = '';
+                    } else {
+                        option.style.display = 'none';
+                    }
+                });
+                itemSelect.value = '';
+                updateItemSelections();
+            });
+        }
+
+        function updateItemSelections() {
+            const selectedValues = Array.from(container.querySelectorAll('.item-select'))
+                .map(sel => sel.value)
+                .filter(val => val);
+
+            container.querySelectorAll('.item-select').forEach(select => {
+                Array.from(select.options).forEach(option => {
+                    if (!option.value) return;
+                    option.disabled = false;
+                    if (selectedValues.includes(option.value) && select.value !== option.value) {
+                        option.disabled = true;
+                    }
+                });
+            });
+        }
+
+        function setupItemSelection(itemRow) {
+            const itemSelect = itemRow.querySelector('.item-select');
+            itemSelect.addEventListener('change', updateItemSelections);
+        }
+
+        function setupItemRow(itemRow) {
+            setupCategoryFilter(itemRow);
+            setupItemSelection(itemRow);
+        }
+
+        setupItemRow(container.querySelector('.purchase-item'));
+
+        addButton.addEventListener('click', function () {
+            const newRow = container.querySelector('.purchase-item').cloneNode(true);
+            newRow.querySelector('.category-select').value = '';
+            const itemSelect = newRow.querySelector('.item-select');
+            itemSelect.value = '';
+            newRow.querySelector('input[name="quantity"]').value = '';
+            newRow.querySelector('input[name="supplier"]').value = '';
+            newRow.querySelector('input[name="unit_price"]').value = '';
+            const actionCell = newRow.querySelector('td:last-child');
+            actionCell.innerHTML = '';
+            const removeButton = document.createElement('button');
+            removeButton.type = 'button';
+            removeButton.className = 'action-link delete';
+            removeButton.textContent = 'Remove';
+            removeButton.onclick = function () {
+                newRow.remove();
+                updateItemSelections();
+            };
+            actionCell.appendChild(removeButton);
+
+            setupItemRow(newRow);
+            container.appendChild(newRow);
+            updateItemSelections();
+        });
+
+        updateItemSelections();
+    });
+</script>
+{% endblock %}

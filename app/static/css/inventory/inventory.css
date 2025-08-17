@@ -1,0 +1,265 @@
+/* Inventory specific styles */
+.inventory-container {
+    background-color: white;
+    border-radius: 8px;
+    padding: 2rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-top: 2rem;
+}
+
+.inventory-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.inventory-header h2 {
+    color: #2e7d32;
+    margin: 0;
+}
+
+.create-button {
+    background-color: #0078d4;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    text-decoration: none;
+    transition: background-color 0.3s;
+}
+
+.create-button:hover {
+    background-color: #006cbd;
+}
+
+.inventory-filters {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.filter-select,
+.search-input {
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    min-width: 200px;
+}
+
+.inventory-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.inventory-table th,
+.inventory-table td {
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+}
+
+.inventory-table th {
+    background-color: #f8f9fa;
+    color: #2e7d32;
+    font-weight: bold;
+}
+
+.action-link {
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    text-decoration: none;
+    margin-right: 0.5rem;
+    color: white;
+}
+
+.action-link.view {
+    background-color: #0078d4;
+}
+
+.action-link.edit {
+    background-color: #ffc107;
+    color: black;
+}
+
+.action-link.delete {
+    background-color: #dc3545;
+}
+
+.form-container {
+    max-width: 600px;
+    margin: 2rem auto;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #2e7d32;
+    font-weight: bold;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.messages {
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border-radius: 4px;
+}
+
+.error {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.success {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+/* Navigation Buttons */
+.nav-buttons {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #eee;
+}
+
+.back-button {
+    background-color: #666;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.back-button:hover {
+    background-color: #555;
+}
+
+.nav-links {
+    display: flex;
+    gap: 1rem;
+}
+
+.nav-link {
+    color: #2e7d32;
+    text-decoration: none;
+    padding: 0.5rem 1rem;
+    border: 1px solid #2e7d32;
+    border-radius: 4px;
+}
+
+.nav-link:hover {
+    background-color: #2e7d32;
+    color: white;
+}
+
+/* Add these styles */
+.quantity-adjustment {
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid #eee;
+}
+
+.quantity-adjustment h3 {
+    color: #2e7d32;
+    margin-bottom: 1rem;
+}
+
+.adjustment-form {
+    max-width: 300px;
+}
+
+.help-text {
+    display: block;
+    color: #666;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+}
+
+/* Style for inline forms (delete buttons) */
+form.inline {
+    display: inline-block;
+}
+
+button.action-link {
+    background: none;
+    border: none;
+    font-size: inherit;
+    cursor: pointer;
+    padding: 0.25rem 0.5rem;
+}
+
+/* Stock Status Button Styles */
+.stock-status-btn {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-weight: bold;
+    text-align: center;
+    min-width: 100px;
+    border: none;
+    cursor: default;
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.stock-status-btn.in-stock {
+    background-color: #28a745;
+    color: white;
+}
+
+.stock-status-btn.low-stock {
+    background-color: #ffc107;
+    color: #212529;
+}
+
+.stock-status-btn.out-of-stock {
+    background-color: #dc3545;
+    color: white;
+}
+
+/* Hover effects for better UX */
+.stock-status-btn.in-stock:hover {
+    background-color: #218838;
+}
+
+.stock-status-btn.low-stock:hover {
+    background-color: #e0a800;
+}
+
+.stock-status-btn.out-of-stock:hover {
+    background-color: #c82333;
+}
+
+/* Quantity display for admin users */
+.quantity-display {
+    font-weight: bold;
+    color: #2e7d32;
+}
+
+.quantity-display.low {
+    color: #ffc107;
+}
+
+.quantity-display.out {
+    color: #dc3545;
+}

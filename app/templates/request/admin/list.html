@@ -1,0 +1,171 @@
+{% extends "request/base.html" %}
+
+{% block title %}All Requests - NMDPRA SMS{% endblock %}
+
+{% block content %}
+<div class="request-container">
+    <div class="nav-buttons">
+        <a href="{{ url_for('home.admin_dashboard') }}" class="back-button">← Back to Dashboard</a>
+    </div>
+
+    <div class="request-header">
+        <h2>All Requests</h2>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    {% for category, message in messages %}
+    <div class="messages {{ category }}">{{ message }}</div>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+
+    <div class="request-filters">
+       <!-- START: MODIFICATION - Add search form -->
+       <form method="GET" action="{{ url_for('request.get_all_requests') }}">
+           <input type="text" name="search_item" placeholder="Search by item..." value="{{ search_item or '' }}">
+           <input type="date" name="search_date" value="{{ search_date or '' }}">
+           <button type="submit">Search</button>
+           <a href="{{ url_for('request.get_all_requests') }}">Clear</a>
+       </form>
+       <!-- END: MODIFICATION -->
+        <select id="status-filter" class="filter-select">
+            <option value="">All Statuses</option>
+            <option value="pending">Pending</option>
+            <option value="approved">Approved</option>
+            <option value="partially_approved">Partially Approved</option>
+            <option value="rejected">Rejected</option>
+            <option value="collected">Collected</option>
+        </select>
+        <select id="location-filter" class="filter-select">
+            <option value="">All Locations</option>
+            <option value="Jabi">Jabi</option>
+            <option value="Headquarters">Headquarters</option>
+        </select>
+        <input type="text" id="search-input" class="search-input" placeholder="Search by reference or user...">
+    </div>
+
+    <div class="request-list">
+        <table class="request-table">
+            <thead>
+                <tr>
+                    <th>Reference Number</th>
+                    <th>Requester</th>
+                    <th>Directorate</th>
+                    <th>Status</th>
+                    <th>Location</th>
+                    <!-- START: MODIFICATION - Display request date -->
+                    <th>Request Date</th>
+                    <!-- END: MODIFICATION -->
+                    <th>Created At</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for request in requests %}
+                <tr data-status="{{ request.status.value }}" data-location="{{ request.location }}" 
+                    data-search="{{ request.reference_number }} {{ request.user.name }} {{ request.user.email }}">
+                    <td>{{ request.reference_number }}</td>
+                    <td>
+                        {{ request.user.name }}<br>
+                        <small>{{ request.user.email }}</small>
+                    </td>
+                    <td>{{ request.directorate.value if request.directorate else 'N/A' }}</td>
+                    <td>
+                        <span class="status-badge status-{{ request.status.value }}">
+                            {{ request.status.value|title }}
+                        </span>
+                    </td>
+                    <td>{{ request.location }}</td>
+                    <!-- START: MODIFICATION - Display request date -->
+                    <td>{{ request.created_at.strftime('%Y-%m-%d') }}</td>
+                    <!-- END: MODIFICATION -->
+                    <td>
+                        <div class="actions-container">
+                            <a href="{{ url_for('request.get_request', request_id=request.id) }}" class="action-link view">View</a>
+                            {% if request.status.value == 'pending' %}
+                            <a href="{{ url_for('request.update_request_status', request_id=request.id) }}" class="action-link edit">Update</a>
+                            {% elif request.status.value == 'approved' or request.status.value == 'partially approved' %}
+                            <a href="{{ url_for('request.mark_collected', request_id=request.id) }}" class="action-link view">Collect</a>
+                            {% endif %}
+                            {% if current_user.is_admin and request.status.value != 'collected' %}
+                            <button type="button" class="action-link delete" onclick="showDeleteModal('{{ request.id }}')">
+                                Delete
+                            </button>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Delete Modal -->
+<div id="deleteModal" class="modal" style="display:none; position:fixed; z-index:1000; left:0; top:0; width:100vw; height:100vh; background:rgba(0,0,0,0.4);">
+    <div style="background:white; max-width:400px; margin:10vh auto; padding:2rem; border-radius:8px; position:relative;">
+        <h3 style="color:#dc3545;">Delete Request</h3>
+        <form id="deleteForm" method="POST">
+            <div class="form-group">
+                <label for="delete-reason">Reason for deletion</label>
+                <textarea id="delete-reason" name="reason" rows="3" required style="width:100%;"></textarea>
+            </div>
+            <div style="margin-top:1rem; display:flex; justify-content:flex-end; gap:1rem;">
+                <button type="button" onclick="hideDeleteModal()" class="action-link view">Cancel</button>
+                <button type="submit" class="action-link delete">Delete</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const statusFilter = document.getElementById('status-filter');
+    const locationFilter = document.getElementById('location-filter');
+        const searchInput = document.getElementById('search-input');
+        const rows = document.querySelectorAll('.request-table tbody tr');
+
+        function filterRows() {
+            const selectedStatus = statusFilter.value.toLowerCase();
+            const selectedLocation = locationFilter.value;
+            const searchTerm = searchInput.value.toLowerCase();
+
+            rows.forEach(row => {
+                const rowStatus = row.dataset.status;
+                const rowLocation = row.dataset.location;
+                const rowSearch = row.dataset.search.toLowerCase();
+                
+                const statusMatch = !selectedStatus || rowStatus === selectedStatus;
+                const locationMatch = !selectedLocation || rowLocation === selectedLocation;
+                const searchMatch = !searchTerm || rowSearch.includes(searchTerm);
+
+                if (statusMatch && locationMatch && searchMatch) {
+                    row.style.display = '';
+    } else {
+        row.style.display = 'none';
+    }
+    });
+        }
+
+        statusFilter.addEventListener('change', filterRows);
+        locationFilter.addEventListener('change', filterRows);
+        searchInput.addEventListener('input', filterRows);
+        });
+        let deleteModal = document.getElementById('deleteModal');
+            let deleteForm = document.getElementById('deleteForm');
+            function showDeleteModal(requestId) {
+                deleteForm.action = "{{ url_for('request.delete_request', request_id=0) }}".replace('0', requestId);
+                document.getElementById('delete-reason').value = '';
+                deleteModal.style.display = 'block';
+            }
+            function hideDeleteModal() {
+                deleteModal.style.display = 'none';
+            }
+            window.onclick = function (event) {
+                if (event.target == deleteModal) {
+                    hideDeleteModal();
+                }
+            }
+</script>
+{% endblock %}

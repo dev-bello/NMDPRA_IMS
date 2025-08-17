@@ -1,0 +1,222 @@
+{% extends "request/base.html" %}
+
+{% block title %}Create Request - NMDPRA SMS{% endblock %}
+
+{% block content %}
+<div class="request-container">
+    <div class="nav-buttons">
+        <a href="{{ url_for('request.get_my_requests') }}" class="back-button">← Back to My Requests</a>
+    </div>
+
+    <div class="request-header">
+        <h2>Create New Request</h2>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    {% for category, message in messages %}
+    <div class="messages {{ category }}">{{ message }}</div>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+
+    <div class="form-container">
+        <form method="POST" class="inventory-form">
+            <div class="form-group">
+                <label for="location">Location</label>
+                <select id="location" name="location" required>
+                    <option value="">Select Location</option>
+                    <option value="Jabi">Jabi</option>
+                    <option value="Headquarters">Headquarters</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="directorate">Directorate <span style="color:red">*</span></label>
+                <select id="directorate" name="directorate" required>
+                    <option value="">Select Directorate</option>
+                    {% for dir in directorate_choices %}
+                    <option value="{{ dir }}" {% if request_form.directorate == dir %}selected{% endif %}>{{ dir }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="department">Department (optional)</label>
+                <input type="text" id="department" name="department" value="{{ request_form.department or '' }}">
+            </div>
+
+            <div class="form-group">
+                <label for="unit">Unit <span style="color:red">*</span></label>
+                <input type="text" id="unit" name="unit" value="{{ request_form.unit or '' }}" required>
+            </div>
+
+            <!--
+                TODO: Remove the request date functionality.
+                This div block containing the date input for the request date should be removed.
+                The functionality is being removed from the application.
+            -->
+            <div class="form-group">
+               <!-- START: MODIFICATION - Add date input for backdating requests -->
+               <label for="request_date">Request Date</label>
+               <input type="date" id="request_date" name="request_date" value="{{ request_form.request_date or '' }}" required>
+               <!-- END: MODIFICATION -->
+           </div>
+
+            <div class="request-items">
+                <h3>Add Items to Request</h3>
+                <table class="request-table">
+                    <thead>
+                        <tr>
+                            <th>Category</th>
+                            <th>Item</th>
+                            <th>Quantity</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="items-container">
+                        <tr class="request-item">
+                            <td>
+                                <select name="category_id" class="category-select" required>
+                                    <option value="">Select Category</option>
+                                    {% for category in categories %}
+                                    <option value="{{ category.id }}">{{ category.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </td>
+                            <td>
+                                <select name="inventory_id" class="item-select" required>
+                                    <option value="">Select Item</option>
+                                    {% for item in inventories %}
+                                    <option value="{{ item.id }}" data-category="{{ item.category.id }}" data-quantity="{{ item.quantity }}">
+                                        {{ item.item_name }}
+                                        {% if current_user.is_admin %}
+                                            (Stock: {{ item.quantity }})
+                                        {% else %}
+                                            <span style="display:inline-block;vertical-align:middle;">
+                                                <span class="stock-status-btn {{ get_stock_status(item.quantity) }}" style="pointer-events:none;cursor:default;min-width:80px;">
+                                                    {{ get_stock_status_text(item.quantity) }}
+                                                </span>
+                                            </span>
+                                        {% endif %}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </td>
+                            <td>
+                                <input type="number" name="quantity" min="1" required>
+                            </td>
+                            <td></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <button type="button" class="action-link view" id="add-item">+ Add Another Item</button>
+            </div>
+
+            <div class="form-group">
+                <button type="submit" class="action-button">Submit Request</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const container = document.getElementById('items-container');
+    const addButton = document.getElementById('add-item');
+
+    function setupCategoryFilter(itemRow) {
+        const categorySelect = itemRow.querySelector('.category-select');
+        const itemSelect = itemRow.querySelector('.item-select');
+        categorySelect.addEventListener('change', function() {
+            const selectedCategory = this.value;
+            Array.from(itemSelect.options).forEach(option => {
+                if (!option.value) {
+                    option.style.display = '';
+                } else if (option.dataset.category === selectedCategory || !selectedCategory) {
+                    option.style.display = '';
+                } else {
+                    option.style.display = 'none';
+                }
+            });
+            itemSelect.value = '';
+            updateItemSelections();
+            setupQuantityMax(itemRow); // Reset max when category changes
+        });
+    }
+
+    function setupQuantityMax(itemRow) {
+        const select = itemRow.querySelector('.item-select');
+        const quantityInput = itemRow.querySelector('input[name="quantity"]');
+        function updateMax() {
+            const option = select.selectedOptions[0];
+            if (option && option.dataset.quantity) {
+                const maxStock = parseInt(option.dataset.quantity);
+                quantityInput.max = maxStock;
+                if (parseInt(quantityInput.value) > maxStock) {
+                    quantityInput.value = maxStock;
+                }
+            } else {
+                quantityInput.removeAttribute('max');
+            }
+        }
+        select.addEventListener('change', updateMax);
+        updateMax();
+    }
+
+    function updateItemSelections() {
+        const selectedValues = Array.from(container.querySelectorAll('.item-select'))
+            .map(sel => sel.value)
+            .filter(val => val);
+
+        container.querySelectorAll('.item-select').forEach(select => {
+            Array.from(select.options).forEach(option => {
+                if (!option.value) return;
+                option.disabled = false;
+                if (selectedValues.includes(option.value) && select.value !== option.value) {
+                    option.disabled = true;
+                }
+            });
+        });
+    }
+
+    function setupItemSelection(itemRow) {
+        const itemSelect = itemRow.querySelector('.item-select');
+        itemSelect.addEventListener('change', updateItemSelections);
+    }
+
+    function setupItemRow(itemRow) {
+        setupCategoryFilter(itemRow);
+        setupQuantityMax(itemRow);
+        setupItemSelection(itemRow);
+    }
+
+    setupItemRow(container.querySelector('.request-item'));
+
+    addButton.addEventListener('click', function() {
+        const newRow = container.querySelector('.request-item').cloneNode(true);
+        newRow.querySelector('.category-select').value = '';
+        const itemSelect = newRow.querySelector('.item-select');
+        itemSelect.value = '';
+        newRow.querySelector('input[name="quantity"]').value = '';
+        const actionCell = newRow.querySelector('td:last-child');
+        actionCell.innerHTML = '';
+        const removeButton = document.createElement('button');
+        removeButton.type = 'button';
+        removeButton.className = 'action-link delete';
+        removeButton.textContent = 'Remove';
+        removeButton.onclick = function() {
+            newRow.remove();
+            updateItemSelections();
+        };
+        actionCell.appendChild(removeButton);
+
+        setupItemRow(newRow);
+        container.appendChild(newRow);
+        updateItemSelections();
+    });
+
+    updateItemSelections();
+});
+</script>
+{% endblock %}

@@ -1,0 +1,77 @@
+{% extends "request/base.html" %}
+
+{% block title %}Recently Deleted Requests - NMDPRA SMS{% endblock %}
+
+{% block content %}
+<div class="request-container">
+    <div class="nav-buttons">
+        <a href="{{ url_for('request.get_all_requests') }}" class="back-button">← Back to All Requests</a>
+        <form method="POST" action="{{ url_for('request.delete_all_deleted_requests') }}" style="display:inline;">
+            <button type="submit" class="action-link delete"
+                onclick="return confirm('Are you sure you want to permanently delete ALL deleted requests? This cannot be undone.')">
+                Delete All
+            </button>
+        </form>
+    </div>
+
+    <div class="request-header">
+        <h2>Recently Deleted Requests</h2>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    {% for category, message in messages %}
+    <div class="messages {{ category }}">{{ message }}</div>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+
+    <div class="request-list">
+        <table class="request-table">
+            <thead>
+                <tr>
+                    <th>Reference Number</th>
+                    <th>Requester</th>
+                    <th>Deleted By</th>
+                    <th>Reason</th>
+                    <th>Deleted At</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for request in requests %}
+                <tr>
+                    <td>{{ request.reference_number }}</td>
+                    <td>
+                        {{ request.user.name }}<br>
+                        <small>{{ request.user.email }}</small>
+                    </td>
+                    <td>
+                        {{ request.deleted_by_user.name if request.deleted_by_user else 'N/A' }}<br>
+                        <small>{{ request.deleted_by_user.email if request.deleted_by_user else '' }}</small>
+                        </td>
+                        <td>{{ request.deletion_reason or 'N/A' }}</td>
+                        <td>{{ request.deleted_at.strftime('%Y-%m-%d %H:%M:%S') if request.deleted_at else '' }}</td>
+                        <td>
+                            <form method="POST" action="{{ url_for('request.restore_request', request_id=request.id) }}"
+                                style="display:inline;">
+                                <button type="submit" class="action-link view" style="margin-right: 10px;">Restore</button>
+                            </form>
+                            <form method="POST" action="{{ url_for('request.permanent_delete_request', request_id=request.id) }}"
+                                style="display:inline;">
+                                <button type="submit" class="action-link delete"
+                                    style="background: none; border: none; padding: 0; vertical-align: middle;"
+                                    onclick="return confirm('Permanently delete this request? This cannot be undone.')"
+                                    title="Delete Permanently">
+                                    <img src="{{ url_for('static', filename='icons/trash-can.svg') }}" alt="Delete"
+                                        style="width: 20px; height: 20px; vertical-align: middle; margin-bottom: 2px; margin-left: 8px;">
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

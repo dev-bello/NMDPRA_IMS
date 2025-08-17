@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}NMDPRA SMS - Dashboard{% endblock %}</title>
+    
+    <!-- Favicon configuration -->
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='images/favicon/favicon.ico') }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='images/favicon/favicon-32x32.png') }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='images/favicon/favicon-16x16.png') }}">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='images/favicon/apple-touch-icon.png') }}">
+    <link rel="manifest" href="{{ url_for('static', filename='images/favicon/site.webmanifest') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/home/home.css') }}">
+    
+    {% block extra_css %}{% endblock %}
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+    <header class="header">
+        <div class="header-left">
+            <img src="{{ url_for('static', filename='images/logo/nmdpra-logo.png') }}" alt="NMDPRA Logo" class="header-logo">
+        </div>
+        <nav class="header-nav">
+            {% if current_user.is_authenticated and current_user.is_admin %}
+            <a href="{{ url_for('home.admin_dashboard') }}">Home</a>
+            {% else %}
+            <a href="{{ url_for('home.user_dashboard') }}">Home</a>
+            {% endif %}
+            <a href="#">Contact</a>
+            <a href="#" class="logout-button" id="logout-link">Logout</a>
+        </nav>
+    </header>
+    <main class="main-content">
+        {% block content %}{% endblock %}
+    </main>
+    <form id="logout-form" action="{{ url_for('auth.logout') }}" method="get" style="display:none;"></form>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var logoutLink = document.getElementById('logout-link');
+        if (logoutLink) {
+            logoutLink.addEventListener('click', function(e) {
+                e.preventDefault();
+                Swal.fire({
+                    title: 'Are you sure you want to log out?',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: getComputedStyle(document.documentElement).getPropertyValue('--color-green'),
+                    cancelButtonColor: getComputedStyle(document.documentElement).getPropertyValue('--color-red'),
+                    confirmButtonText: 'Yes, log me out',
+                    cancelButtonText: 'Cancel',
+                    background: getComputedStyle(document.documentElement).getPropertyValue('--color-white'),
+                    color: getComputedStyle(document.documentElement).getPropertyValue('--color-green-dark'),
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        document.getElementById('logout-form').submit();
+                    }
+                });
+            });
+        }
+    });
+    </script>
+</body>
+</html>

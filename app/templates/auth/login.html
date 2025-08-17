@@ -1,0 +1,271 @@
+{% extends "auth/base.html" %}
+
+{% block title %}NMDPRA SMS{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Show/hide password toggle
+        var passwordInput = document.getElementById('password');
+        var toggleBtn = document.getElementById('toggle-password');
+        var toggleIcon = document.getElementById('toggle-password-icon');
+        if (toggleBtn && passwordInput) {
+            toggleBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                if (passwordInput.type === 'password') {
+                    passwordInput.type = 'text';
+                    toggleIcon.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block;"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 19c-7 0-11-7-11-7a21.81 21.81 0 0 1 5.06-5.94M1 1l22 22"/><path d="M9.53 9.53A3.5 3.5 0 0 0 12 15.5a3.5 3.5 0 0 0 2.47-5.97"/></svg>';
+                    toggleBtn.setAttribute('aria-label', 'Hide password');
+                } else {
+                    passwordInput.type = 'password';
+                    toggleIcon.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block;"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"></path><circle cx="12" cy="12" r="3"></circle></svg>';
+                    toggleBtn.setAttribute('aria-label', 'Show password');
+                }
+            });
+        }
+        // SweetAlert2 flash messages
+        var flashMessages = [];
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                flashMessages.push({
+                    category: {{ category|tojson }},
+                    message: {{ message|tojson }}
+                });
+            {% endfor %}
+        {% endif %}
+        {% endwith %}
+        flashMessages.forEach(function(msg) {
+            Swal.fire({
+                icon: msg.category === 'success' ? 'success' : (msg.category === 'error' ? 'error' : 'info'),
+                title: msg.message,
+                showConfirmButton: false,
+                timer: 2500,
+                background: getComputedStyle(document.documentElement).getPropertyValue('--color-white'),
+                color: getComputedStyle(document.documentElement).getPropertyValue('--color-green-dark'),
+                customClass: {
+                    popup: 'swal2-popup-custom'
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="login-bg">
+  <div class="login-card">
+    <header class="auth-header">
+      <img src="{{ url_for('static', filename='images/logo/nmdpra-logo.png') }}" alt="NMDPRA Logo" class="logo">
+      <h1>NMDPRA Store Management System</h1>
+      <p>Staff & Personnel Login</p>
+    </header>
+    <div class="auth-content">
+      <form method="POST" action="{{ url_for('auth.local_login') }}" class="local-login-form modern-form">
+        <h2>Sign in with Email</h2>
+        <div class="form-group input-group">
+          <label for="email">Email</label>
+          <div class="input-with-icon">
+            <input type="email" id="email" name="email" required placeholder="Enter your email">
+          </div>
+        </div>
+        <div class="form-group input-group">
+          <label for="password">Password</label>
+          <div class="input-with-icon">
+            <input type="password" id="password" name="password" required placeholder="Enter your password">
+            <button type="button" id="toggle-password" aria-label="Show password">
+              <svg id="toggle-password-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block;"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+            </button>
+          </div>
+        </div>
+        <button type="submit" class="login-button">Sign in with Email</button>
+      </form>
+      <div class="divider modern-divider">
+        <span>OR</span>
+        <hr>
+      </div>
+      <div class="ms-login-section">
+        <p>Sign in with your Microsoft account</p>
+        {% if auth_url %}
+        <a href="{{ auth_url }}" class="login-button">Sign in with Microsoft</a>
+        {% else %}
+        <p class="error">Login system is currently unavailable. Please try again later.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+:root {
+  --login-card-width: 410px;
+  --login-card-padding: 2.5rem 2.2rem 2.2rem 2.2rem;
+  --login-card-radius: var(--radius);
+  --login-card-shadow: 0 8px 32px rgba(46,125,50,0.10), 0 1.5px 4px rgba(46,125,50,0.08);
+}
+.login-bg {
+  min-height: 100vh;
+  background: linear-gradient(135deg, var(--color-green-light) 0%, #f5fff7 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.login-card {
+  width: var(--login-card-width);
+  background: var(--color-white);
+  border-radius: var(--login-card-radius);
+  box-shadow: var(--login-card-shadow);
+  padding: var(--login-card-padding);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+}
+.auth-header {
+  text-align: center;
+  margin-bottom: 0.5rem;
+}
+.auth-header .logo {
+  max-width: 90px;
+  margin-bottom: 0.7rem;
+}
+.auth-header h1 {
+  font-size: 1.35rem;
+  color: var(--color-green-dark);
+  margin: 0 0 0.2rem 0;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+.auth-header p {
+  font-size: 1rem;
+  color: var(--color-green);
+  margin: 0;
+}
+.auth-content {
+  width: 100%;
+}
+.modern-form {
+  background: var(--color-gray-light);
+  border-radius: var(--radius);
+  padding: 1.7rem 1.2rem 1.2rem 1.2rem;
+  box-shadow: 0 1.5px 8px var(--color-shadow-light);
+  margin-bottom: 1.5rem;
+  max-width: 100%;
+  margin-left: 0;
+  margin-right: 0;
+  box-sizing: border-box;
+}
+.modern-form h2 {
+  color: var(--color-green-dark);
+  margin-bottom: 1.15rem;
+  font-size: 1.13rem;
+  font-weight: 600;
+}
+.modern-form .form-group {
+  margin-bottom: 1.15rem;
+}
+.modern-form label {
+  color: var(--color-green-dark);
+  font-weight: 500;
+  margin-bottom: 0.35rem;
+  display: block;
+}
+.input-group {
+  width: 100%;
+}
+.input-with-icon {
+  display: flex;
+  align-items: center;
+  position: relative;
+  width: 100%;
+}
+.input-with-icon input[type="email"],
+.input-with-icon input[type="password"],
+.input-with-icon input[type="text"] {
+  flex: 1 1 auto;
+  width: 100%;
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--button-radius);
+  padding: 0.7rem 2.5rem 0.7rem 1rem;
+  font-size: 1rem;
+  background: var(--color-white);
+  transition: border-color var(--transition);
+  box-sizing: border-box;
+}
+.input-with-icon input[type="email"]:focus,
+.input-with-icon input[type="password"]:focus,
+.input-with-icon input[type="text"]:focus {
+  border-color: var(--color-green);
+  outline: none;
+}
+#toggle-password {
+  position: absolute;
+  right: 0.7rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-green-dark);
+  padding: 0;
+  display: flex;
+  align-items: center;
+  height: 1.7rem;
+  width: 1.7rem;
+  border-radius: 50%;
+  transition: background 0.2s, color 0.2s;
+  justify-content: center;
+  z-index: 2;
+}
+#toggle-password:hover, #toggle-password:focus {
+  background: var(--color-green-light);
+  color: var(--color-green);
+  outline: none;
+}
+#toggle-password-icon {
+  pointer-events: none;
+  font-size: 20px;
+  line-height: 1;
+  display: block;
+}
+.login-button {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  margin-top: 1.1rem;
+  font-size: 1.08rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  box-shadow: 0 1px 4px var(--color-shadow-light);
+  overflow: hidden;
+  padding: 0.7rem 0;
+  border-radius: var(--button-radius);
+}
+.modern-divider {
+  margin: 1.5rem 0 1.2rem 0;
+}
+.divider span {
+  font-size: 0.95rem;
+  color: var(--color-gray);
+}
+.ms-login-section {
+  text-align: center;
+}
+.ms-login-section p {
+  margin-bottom: 0.7rem;
+  color: var(--color-green-dark);
+  font-size: 1rem;
+}
+@media (max-width: 600px) {
+  .login-card {
+    width: 98vw;
+    padding: 1.2rem 0.5rem;
+  }
+  .modern-form {
+    padding: 1rem 0.5rem;
+  }
+}
+</style>
+{% endblock %}

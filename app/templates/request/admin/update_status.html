@@ -1,0 +1,127 @@
+{% extends "request/base.html" %}
+
+{% block title %}Update Request Status - NMDPRA SMS{% endblock %}
+
+{% block content %}
+<div class="request-container">
+    <div class="nav-buttons">
+        <a href="{{ url_for('request.get_request', request_id=request.id) }}" class="back-button">← Back to Request</a>
+    </div>
+
+    <div class="request-header">
+        <h2>Update Request Status</h2>
+        <span class="status-badge status-{{ request.status.value }}">
+            Current: {{ request.status.value|title }}
+        </span>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    {% for category, message in messages %}
+    <div class="messages {{ category }}">{{ message }}</div>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+
+    <div class="request-details">
+        <div class="request-detail-item">
+            <div class="detail-label">Reference Number</div>
+            <div class="detail-value">{{ request.reference_number }}</div>
+        </div>
+        <div class="request-detail-item">
+            <div class="detail-label">Requester</div>
+            <div class="detail-value">
+                {{ request.user.name }}<br>
+                <small>{{ request.user.email }}</small>
+            </div>
+        </div>
+        <div class="request-detail-item">
+            <div class="detail-label">Directorate</div>
+            <div class="detail-value">{{ request.directorate.value if request.directorate else 'N/A' }}</div>
+        </div>
+        <div class="request-detail-item">
+            <div class="detail-label">Department</div>
+            <div class="detail-value">{{ request.department or 'N/A' }}</div>
+        </div>
+        <div class="request-detail-item">
+            <div class="detail-label">Unit</div>
+            <div class="detail-value">{{ request.unit }}</div>
+        </div>
+        <div class="request-detail-item">
+            <div class="detail-label">Location</div>
+            <div class="detail-value">{{ request.location }}</div>
+        </div>
+        <div class="request-detail-item">
+            <div class="detail-label">Created At</div>
+            <div class="detail-value">{{ request.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</div>
+        </div>
+
+    </div>
+
+    <div class="form-container">
+        <form method="POST" class="inventory-form" id="update-status-form">
+            <div class="form-group">
+                <label for="admin_message">Admin Message</label>
+                <textarea id="admin_message" name="admin_message" rows="4" 
+                          placeholder="Add a message or note about this status update">{{ request.admin_message or '' }}</textarea>
+            </div>
+
+            <div class="request-items">
+                <h3>Requested Items</h3>
+                <table class="request-table">
+                    <thead>
+                        <tr>
+                            <th>Item Name</th>
+                            <th>Category</th>
+                            <th>Quantity Requested</th>
+                            <th>Quantity Approved</th>
+                            <th>Current Stock</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in request.items %}
+                        <tr>
+                            <td>{{ item.inventory.item_name }}</td>
+                            <td>{{ item.inventory.category.name }}</td>
+                            <td>{{ item.quantity }}</td>
+                            <td>
+                                <input type="number"
+                                       name="approved_quantity_{{ item.id }}"
+                                       min="0"
+                                       max="{{ item.inventory.quantity }}"
+                                       value="{{ item.quantity_approved or item.quantity }}"
+                                       required
+                                       style="width: 80px;">
+                            </td>
+                            <td>{{ item.inventory.quantity }}</td>
+                            <td>
+                                <select name="item_status_{{item.id }}" required>
+                                    <option value="approved" {% if item.status.value == 'approved' %}selected{% endif %}>Approved</option>
+                                    <option value="rejected" {% if item.status.value == 'rejected' %}selected{% endif %}>Rejected</option>
+                                </select>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="form-group" style="margin-top: 2rem;">
+                <button type="submit" class="action-button">Update Request Status</button>
+                <a href="{{ url_for('request.get_request', request_id=request.id) }}" 
+                   class="action-link view">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+document.getElementById('update-status-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    if (confirm("Do you confirm this submission?")) {
+        this.submit();
+    }
+});
+</script>
+{% endblock %}

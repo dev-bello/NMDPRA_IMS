@@ -1,0 +1,143 @@
+{# Main inventory listing template
+- Displays filterable table of all inventory items
+- Provides category filtering and search functionality
+- Shows admin-only actions for item management
+#}
+
+{% extends "inventory/base.html" %}
+
+{% block title %}Inventory Management - NMDPRA SMS{% endblock %}
+
+{% block content %}
+<div class="inventory-container">
+    <div class="nav-buttons">
+        <a href="{{ url_for('home.admin_dashboard' if current_user.is_admin else 'home.user_dashboard') }}" 
+           class="back-button">← Back to Dashboard</a>
+        <div class="nav-links">
+            <a href="{{ url_for('inventory.categories') }}" class="nav-link">Manage Categories</a>
+            {% if is_admin %}
+            <a href="{{ url_for('inventory.create_item') }}" class="nav-link">Add New Item</a>
+            <a href="{{ url_for('inventory.bulk_create_items') }}" class="create-button">Bulk Add Items</a>
+            {% endif %}
+        </div>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    {% for category, message in messages %}
+    <div class="messages {{ category }}">{{ message }}</div>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+
+    <!-- Add filter controls -->
+    <div class="inventory-filters">
+        <!-- Category dropdown for filtering items -->
+        <select id="category-filter" class="filter-select">
+            <option value="">All Categories</option>
+            {% for category in categories %}
+            <option value="{{ category.id }}">{{ category.name }}</option>
+            {% endfor %}
+        </select>
+        
+        <!-- Search input for filtering by item name -->
+        <input type="text" id="search-input" class="search-input" placeholder="Search items...">
+    </div>
+
+    <!-- Main inventory table -->
+    <div class="inventory-list">
+        <table class="inventory-table">
+            <thead>
+                <tr>
+                    <th>Item Name</th>
+                    <th>Category</th>
+                    <th>{% if is_admin %}Quantity{% else %}Stock Status{% endif %}</th>
+                    {% if is_admin %}
+                    <th>Supplier</th>
+                    <th>Unit Price</th>
+                    {% endif %}
+                    <th>Location</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in inventories %}
+                <tr>
+                    <td>{{ item.item_name }}</td>
+                    <td data-category-id="{{ item.category.id }}">{{ item.category.name }}</td>
+                    <td>
+                        {% if is_admin %}
+                            <span class="quantity-display {% if item.quantity == 0 %}out{% elif item.quantity < 15 %}low{% endif %}">
+                                {{ item.quantity }}
+                            </span>
+                        {% else %}
+                            <button class="stock-status-btn {{ get_stock_status(item.quantity) }}" disabled>
+                                {{ get_stock_status_text(item.quantity) }}
+                            </button>
+                        {% endif %}
+                    </td>
+                    {% if is_admin %}
+                    <td>{{ item.supplier or 'N/A' }}</td>
+                    <td>{{ '₦%.2f'|format(item.unit_price) if item.unit_price else 'N/A' }}</td>
+                    {% endif %}
+                    <td>{{ item.location or 'N/A' }}</td>
+                    <td>
+                        <a href="{{ url_for('inventory.view_item', inventory_id=item.id) }}" 
+                           class="action-link view">View</a>
+                        {% if is_admin %}
+                        <a href="{{ url_for('inventory.edit_item', inventory_id=item.id) }}" 
+                           class="action-link edit">Edit</a>
+                        <form action="{{ url_for('inventory.delete_item', inventory_id=item.id) }}" 
+                              method="POST" style="display: inline;">
+                            <button type="submit" class="action-link delete" 
+                                    onclick="return confirm('Are you sure you want to delete this item?')">
+                                Delete
+                            </button>
+                        </form>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- JavaScript for dynamic filtering -->
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const categoryFilter = document.getElementById('category-filter');
+        const searchInput = document.getElementById('search-input');
+
+        // Handle category filtering
+        categoryFilter.addEventListener('change', function () {
+            const selectedCategoryId = this.value; // This is the category ID
+            const rows = document.querySelectorAll('.inventory-table tbody tr');
+
+            rows.forEach(row => {
+                // Add a data attribute for category ID in the HTML
+                if (selectedCategoryId === '' || row.querySelector('td:nth-child(2)').getAttribute('data-category-id') === selectedCategoryId) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+
+        // Handle search filtering
+        searchInput.addEventListener('input', function () {
+            const searchTerm = this.value.toLowerCase();
+            const rows = document.querySelectorAll('.inventory-table tbody tr');
+
+            rows.forEach(row => {
+                const itemNameCell = row.cells[0].textContent.toLowerCase();
+                if (itemNameCell.includes(searchTerm)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

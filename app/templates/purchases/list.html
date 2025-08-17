@@ -1,0 +1,92 @@
+{% extends "purchases/base.html" %}
+
+{% block title %}Purchase History{% endblock %}
+
+{% block content %}
+<div class="purchase-container">
+    <div class="nav-buttons">
+        <a href="{{ url_for('home.admin_dashboard') }}" class="back-button">← Back to Dashboard</a>
+        <a href="{{ url_for('purchases.new_purchase') }}" class="action-button">+ New Purchase</a>
+    </div>
+
+    <div class="purchase-header">
+        <h2>Purchase History</h2>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    {% for category, message in messages %}
+    <div class="messages {{ category }}">{{ message }}</div>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+
+    <div class="purchase-filters">
+        <form method="GET" action="{{ url_for('purchases.list_purchases') }}" class="filter-form">
+            <div class="filter-group">
+                <label for="supplier_name">Supplier Name:</label>
+                <input type="text" id="supplier_name" name="supplier_name" class="form-control filter-input"
+                       value="{{ current_supplier_name if current_supplier_name else '' }}">
+            </div>
+            <div class="filter-group">
+                <label for="item_name">Item Name:</label>
+                <input type="text" id="item_name" name="item_name" class="form-control filter-input"
+                       value="{{ current_item_name if current_item_name else '' }}">
+            </div>
+            <div class="filter-group">
+                <label for="start_date">From Date:</label>
+                <input type="date" id="start_date" name="start_date" class="form-control filter-input"
+                       value="{{ current_start_date if current_start_date else '' }}">
+            </div>
+            <div class="filter-group">
+                <label for="end_date">To Date:</label>
+                <input type="date" id="end_date" name="end_date" class="form-control filter-input"
+                       value="{{ current_end_date if current_end_date else '' }}">
+            </div>
+            <button type="submit" class="action-button filter-button">Filter</button>
+            <a href="{{ url_for('purchases.list_purchases') }}" class="action-link view clear-filters-button">Clear Filters</a>
+        </form>
+    </div>
+
+    <div class="purchase-items">
+        {% if purchases %}
+        <div class="table-responsive">
+            <table class="purchase-table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Item</th>
+                        <th>Quantity</th>
+                        <th>Supplier</th>
+                        <th>Unit Price</th>
+                        <th>Recorded By</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for purchase in purchases %}
+                    <tr>
+                        <td>{{ purchase.timestamp.strftime('%Y-%m-%d %H:%M') }}</td>
+                        <td>{{ purchase.inventory.item_name }}</td>
+                        <td>{{ purchase.quantity }}</td>
+                        <td>{{ purchase.supplier.supplier_name if purchase.supplier else purchase.inventory.supplier or '-' }}</td>
+                        <td>
+                            {% if purchase.unit_price %}
+                            ₦{{ '%.2f'|format(purchase.unit_price) }}
+                            {% elif purchase.inventory.unit_price %}
+                            ₦{{ '%.2f'|format(purchase.inventory.unit_price) }}
+                            {% else %}
+                            -
+                            {% endif %}
+                        </td>
+                        <td>{{ purchase.user.name if purchase.user else 'N/A' }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p>No purchases recorded yet.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

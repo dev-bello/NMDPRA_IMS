@@ -1,0 +1,68 @@
+{% extends "home/base.html" %}
+
+{% block title %}Admin Dashboard - NMDPRA SMS{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <div class="welcome-section">
+        <h2>Hi, {{ current_user.name }} (Admin)</h2>
+        <p>Last login: {{ current_user.last_login.strftime('%Y-%m-%d %H:%M:%S') }}</p>
+    </div>
+    
+    <div class="user-profile-section">
+        <h3>Your Profile Information</h3>
+        <div class="profile-details">
+            <div class="profile-item">
+                <strong>Email:</strong> {{ current_user.email }}
+            </div>
+            <div class="profile-item">
+                <strong>Job Title:</strong> {{ current_user.job_title or 'Not specified' }}
+            </div>
+            <div class="profile-item">
+                <strong>Department:</strong> {{ current_user.department or 'Not specified' }}
+            </div>
+            <!-- <div class="profile-item">
+                <strong>Company:</strong> {{ current_user.company_name or 'Not specified' }}
+            </div>
+            <div class="profile-item">
+                <strong>Office Location:</strong> {{ current_user.office_location or 'Not specified' }}
+            </div> -->
+        </div>
+    </div>
+    
+    <div class="quick-actions">
+        <h3>Quick Actions</h3> 
+        <div class="action-buttons">
+            <a href="{{ url_for('inventory.index') }}" class="action-button">
+                Manage Inventory
+            </a>
+            {% if current_user.is_admin %}
+            <a href="{{ url_for('request.get_all_requests') }}" class="action-button">
+                View All Requests
+            </a>
+            <a href="{{ url_for('request.get_deleted_requests') }}" class="action-button" style="background:#dc3545;">
+                Recently Deleted
+            </a>
+            <a href="{{ url_for('reports.inventory_report') }}" class="action-button">
+                Inventory Report
+            </a>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if current_user.is_admin %}
+    <div class="quick-actions">
+        <h3>Purchases</h3>
+        <div class="action-buttons">
+            <a href="{{ url_for('purchases.list_purchases') }}" class="action-button">
+                Manage Purchases
+            </a>
+            <a href="{{ url_for('purchases.new_purchase') }}" class="action-button">
+                Record New Purchase
+            </a>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+{% endblock %}
