@@ -112,3 +112,4 @@ test_local_auth.py
 *.csv
 clean_stock_report.py
 .roomodes
+.kilocode/
