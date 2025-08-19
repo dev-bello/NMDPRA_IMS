@@ -51,17 +51,6 @@
                 <input type="text" id="unit" name="unit" value="{{ request_form.unit or '' }}" required>
             </div>
 
-            <!--
-                TODO: Remove the request date functionality.
-                This div block containing the date input for the request date should be removed.
-                The functionality is being removed from the application.
-            -->
-            <div class="form-group">
-               <!-- START: MODIFICATION - Add date input for backdating requests -->
-               <label for="request_date">Request Date</label>
-               <input type="date" id="request_date" name="request_date" value="{{ request_form.request_date or '' }}" required>
-               <!-- END: MODIFICATION -->
-           </div>
 
             <div class="request-items">
                 <h3>Add Items to Request</h3>
