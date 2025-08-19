@@ -54,9 +54,6 @@
                     <th>Directorate</th>
                     <th>Status</th>
                     <th>Location</th>
-                    <!-- START: MODIFICATION - Display request date -->
-                    <th>Request Date</th>
-                    <!-- END: MODIFICATION -->
                     <th>Created At</th>
                     <th>Actions</th>
                 </tr>
@@ -77,9 +74,7 @@
                         </span>
                     </td>
                     <td>{{ request.location }}</td>
-                    <!-- START: MODIFICATION - Display request date -->
-                    <td>{{ request.created_at.strftime('%Y-%m-%d') }}</td>
-                    <!-- END: MODIFICATION -->
+                    <td>{{ request.created_at }}</td>
                     <td>
                         <div class="actions-container">
                             <a href="{{ url_for('request.get_request', request_id=request.id) }}" class="action-link view">View</a>

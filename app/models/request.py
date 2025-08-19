@@ -65,16 +65,8 @@ class Request(db.Model):
     deleted_by_user = db.relationship('User', foreign_keys=[deleted_by], backref='deleted_requests')
     items = db.relationship('RequestItem', backref='request', cascade='all, delete-orphan')
 
-    # TODO: Remove the request date functionality.
-    # The `request_date` parameter should be removed from the method signature.
-    # The method signature should be updated to:
-    # def create_request(cls, user_id, location, directorate, department, unit):
-    #
-    # The `created_at` field should be updated to always use the current time.
-    # The line should be updated to:
-    # created_at=datetime.now(UTC)
     @classmethod
-    def create_request(cls, user_id, location, directorate, department, unit, request_date=None):
+    def create_request(cls, user_id, location, directorate, department, unit):
         """Create a new request."""
         try:
             reference_number = f"REQ-{uuid.uuid4().hex[:8].upper()}"
@@ -85,11 +77,7 @@ class Request(db.Model):
                 directorate=DirectorateEnum(directorate),
                 department=department,
                 unit=unit,
-                # START: MODIFICATION - Allow backdating of requests
-                # If a request_date is provided, it overrides the default created_at timestamp.
-                # This allows the request to be recorded for a past date.
-                created_at=request_date if request_date else datetime.now(UTC)
-                # END: MODIFICATION
+                created_at=datetime.now(UTC)
             )
             db.session.add(request)
             db.session.commit()
@@ -290,11 +278,7 @@ class Request(db.Model):
                         quantity=-item.quantity_approved,
                         related_request_id=self.id,
                         performed_by=current_user.id,
-                        # START: MODIFICATION - Ensure report accuracy
-                        # The inventory transaction timestamp is set to the request's created_at date.
-                        # This ensures that backdated requests are reflected correctly in reports.
-                        timestamp=self.created_at,
-                        # END: MODIFICATION
+                        timestamp=datetime.now(UTC),
                         note=f"Collected by {current_user.name}"
                     )
                     db.session.add(transaction)

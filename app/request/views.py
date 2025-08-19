@@ -40,11 +40,6 @@ def create_request():
             directorate = data.get('directorate')
             department = data.get('department')
             unit = data.get('unit')
-            # TODO: Remove the request date functionality.
-            # The following line that retrieves the 'request_date' from the form should be removed.
-            # START: MODIFICATION - Get request date from form
-            request_date_str = data.get('request_date')
-            # END: MODIFICATION
             items = []
             
             # Process form data for items
@@ -66,10 +61,7 @@ def create_request():
                 'unit': unit,
                 'location': location,
                 'inventory_ids': inventory_ids,
-                'quantities': quantities,
-                # TODO: Remove the request date functionality.
-                # The 'request_date' key-value pair should be removed from this dictionary.
-                'request_date': request_date_str
+                'quantities': quantities
             }
 
             # Validation
@@ -95,27 +87,13 @@ def create_request():
                                        get_stock_status_text=get_stock_status_text)
     
 
-            # TODO: Remove the request date functionality.
-            # The `request_date` argument should be removed from the `create_request` method call.
-            # The method call should be updated to:
-            # new_request, error = Request.create_request(
-            #     user_id=current_user.id,
-            #     location=location,
-            #     directorate=directorate,
-            #     department=department,
-            #     unit=unit
-            # )
             # Create the request
             new_request, error = Request.create_request(
                 user_id=current_user.id,
                 location=location,
                 directorate=directorate,
                 department=department,
-                unit=unit,
-                # START: MODIFICATION - Pass request date to model
-                # The selected date is passed to the create_request method.
-                request_date=datetime.strptime(request_date_str, '%Y-%m-%d') if request_date_str else None
-                # END: MODIFICATION
+                unit=unit
             )
             if error:
                 flash(error, 'error')
